@@ -20,7 +20,7 @@ local function ShowStartPopup()
     
     local label = Instance.new("TextLabel", frame)
     label.Size = UDim2.new(1, 0, 1, 0)
-    label.Text = "Hệ thống đang khởi động...\n[ Vui lòng chờ 5 giây ]"
+    label.Text = "Hệ thống đang khởi động...\n[ Vui lòng chờ ]"
     label.TextColor3 = Color3.fromRGB(255, 200, 0)
     label.Font = Enum.Font.SourceSansBold
     label.TextSize = 16
@@ -28,38 +28,6 @@ local function ShowStartPopup()
     
     game:GetService("Debris"):AddItem(sg, 5)
 end
-
--- 2. Chức năng NoClip (Xuyên tường)
-local noclipConnection
-noclipConnection = runService.Stepped:Connect(function()
-    if getgenv().ScriptEnabled and player.Character then
-        for _, part in pairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") and part.CanCollide then
-                part.CanCollide = false
-            end
-        end
-    end
-end)
-
--- 3. Nút Tắt Toàn Bộ Menu
-local mainGui = Instance.new("ScreenGui", coreGui)
-local closeBtn = Instance.new("TextButton", mainGui)
-closeBtn.Size = UDim2.new(0, 130, 0, 45)
-closeBtn.Position = UDim2.new(0, 15, 0.45, 0)
-closeBtn.Text = "TẮT SCRIPT"
-closeBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-closeBtn.TextColor3 = Color3.new(1, 1, 1)
-closeBtn.Font = Enum.Font.SourceSansBold
-closeBtn.TextSize = 16
-closeBtn.Draggable = true
-
-closeBtn.MouseButton1Click:Connect(function()
-    getgenv().ScriptEnabled = false
-    getgenv().SystemExecuted = false
-    if noclipConnection then noclipConnection:Disconnect() end
-    mainGui:Destroy()
-    warn("Toàn bộ chức năng đã được dừng.")
-end)
 
 -- 4. Hàm chạy script PANDA (Chạy khi khởi động và khi hồi sinh)
 local function RunPanda()
@@ -77,7 +45,7 @@ ShowStartPopup()
 RunPanda()
 
 -- BƯỚC 2: Đợi 5 giây rồi chạy Banana (Chỉ chạy 1 lần này)
-task.delay(5, function()
+task.delay(20, function()
     if getgenv().ScriptEnabled then
         pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/kimprobloxdz/Banana-Free/refs/heads/main/Protected_5609200582002947.lua.txt"))()
