@@ -1,9 +1,86 @@
-pcall(function()
-    loadstring(game:HttpGet("https://pandadevelopment.net/virtual/file/e9c206fd76482ee2"))()
+-- Ngăn chặn chạy chồng chéo
+if getgenv().AlreadyExecuted then return end
+getgenv().AlreadyExecuted = true
+
+local player = game.Players.LocalPlayer
+local runService = game:GetService("RunService")
+local coreGui = game:GetService("CoreGui")
+
+-- Biến kiểm soát
+getgenv().ScriptEnabled = true
+
+-- 1. Hàm hiện Popup (Chỉ hiện 1 lần lúc đầu)
+local function ShowInitialPopup()
+    local sg = Instance.new("ScreenGui", coreGui)
+    local frame = Instance.new("Frame", sg)
+    frame.Size = UDim2.new(0, 250, 0, 60)
+    frame.Position = UDim2.new(0.5, -125, 0.1, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.BorderSizePixel = 2
+    
+    local label = Instance.new("TextLabel", frame)
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.Text = "Hệ thống đã kích hoạt!"
+    label.TextColor3 = Color3.fromRGB(0, 255, 100)
+    label.Font = Enum.Font.SourceSansBold
+    label.TextSize = 18
+    label.BackgroundTransparency = 1
+    
+    game:GetService("Debris"):AddItem(sg, 3)
+end
+
+-- 2. Chức năng NoClip
+local noclipConnection
+noclipConnection = runService.Stepped:Connect(function()
+    if getgenv().ScriptEnabled and player.Character then
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
 end)
 
-task.wait(4)
+-- 3. Nút Tắt Menu & Chức năng
+local mainGui = Instance.new("ScreenGui", coreGui)
+local closeBtn = Instance.new("TextButton", mainGui)
+closeBtn.Size = UDim2.new(0, 120, 0, 40)
+closeBtn.Position = UDim2.new(0, 10, 0.4, 0)
+closeBtn.Text = "DỪNG SCRIPT"
+closeBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Draggable = true
 
+closeBtn.MouseButton1Click:Connect(function()
+    getgenv().ScriptEnabled = false
+    getgenv().AlreadyExecuted = false
+    if noclipConnection then noclipConnection:Disconnect() end
+    mainGui:Destroy()
+    print("Đã tắt toàn bộ script.")
+end)
+
+-- 4. Thực thi Script BANANA (Chỉ chạy 1 lần duy nhất)
 pcall(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/kimprobloxdz/Banana-Free/refs/heads/main/Protected_5609200582002947.lua.txt"))()
 end)
+
+-- 5. Hàm thực thi Script PANDA (Chạy khi mới bật và khi hồi sinh)
+local function RunPandaScript()
+    if getgenv().ScriptEnabled then
+        pcall(function()
+            loadstring(game:HttpGet("https://pandadevelopment.net/virtual/file/e9c206fd76482ee2"))()
+        end)
+    end
+end
+
+-- 6. Xử lý khi hồi sinh (Chỉ chạy lại Panda)
+player.CharacterAdded:Connect(function()
+    if getgenv().ScriptEnabled then
+        task.wait(2) -- Đợi nhân vật load xong
+        RunPandaScript()
+    end
+end)
+
+-- Kích hoạt lần đầu
+ShowInitialPopup()
+RunPandaScript()
